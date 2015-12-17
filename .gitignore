@@ -5,3 +5,4 @@ concrete
 deps
 deps.plt
 erln8.config
+.rebar
