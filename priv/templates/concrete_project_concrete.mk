@@ -131,7 +131,7 @@ endif
 all: .concrete/DEV_MODE $(DEPS)
 	@$(MAKE) all_but_dialyzer dialyzer
 
-all_but_dialyzer: .concrete/DEV_MODE compile $(ALL_HOOK) eunit
+all_but_dialyzer: .concrete/DEV_MODE compile $(ALL_HOOK) test
 
 $(REBAR):
 	curl -Lo rebar $(REBAR_URL) || wget $(REBAR_URL)
@@ -154,6 +154,9 @@ allclean:
 
 compile: $(DEPS)
 	@$(REBARC) compile
+	@if [ -n "$(COMPILE_AFTER_HOOK)" ] ; then \
+		make $(COMPILE_AFTER_HOOK) ;\
+	fi
 
 $(DEPS):
 	@$(REBARC) get-deps
@@ -162,12 +165,13 @@ $(DEPS):
 # wasted effort of cleaning deps before nuking them.
 distclean:
 	@rm -rf deps $(DEPS_PLT)
-	@$(REBARC) clean
+	@make clean
 
 eunit:
 	@$(REBARC) skip_deps=true eunit
 
-test: eunit
+TEST_HOOK ?= eunit
+test: $(TEST_HOOK)
 
 ## Override DIALYZER_SRC if your beams live somewhere else
 DIALYZER_SRC ?= -r ebin
